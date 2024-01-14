@@ -1,4 +1,7 @@
+import { Product, Seller, updateSellerType } from "@/types";
+
 import api from "@/utils/axiosInstance";
+
 import { SellerLoginSchema, SellerRegisterSchema } from "@/validation/seller";
 
 export async function registerSeller(data: SellerRegisterSchema) {
@@ -8,4 +11,19 @@ export async function registerSeller(data: SellerRegisterSchema) {
 export async function loginSeller(data: SellerLoginSchema) {
   const response = await api.post("/api/v1/seller/login", data);
   return response;
+}
+
+export async function getAllProductsOfSeller(): Promise<Product[]> {
+  const response = await api.get("/api/v1/seller/allProducts");
+  return await response.data;
+}
+
+export async function getSellerProfile(): Promise<Seller> {
+  const response = await api.get("/api/v1/seller/profile");
+  return await response.data;
+}
+
+export async function updateSellerById(id: string, data: updateSellerType) {
+  const response = await api.put(`/api/v1/seller/profile/update/${id}`, data);
+  return await response.data;
 }
