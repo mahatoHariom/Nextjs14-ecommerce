@@ -22,6 +22,6 @@ export const sellerLoginSchema = z.object({
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
 });
-// type LoginSchema = z.infer<typeof sellerLoginSchema>;
+
 export type SellerLoginSchema = z.infer<typeof sellerRegisterSchema>;
 export type SellerRegisterSchema = z.infer<typeof sellerRegisterSchema>;

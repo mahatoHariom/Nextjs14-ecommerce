@@ -55,14 +55,3 @@ export enum UserRole {
   SELLER = "seller",
 }
 
-export type updateSellerType = {
- 
-  firstName: string;
-  lastName: string;
-  email: string;
-  contact: string;
-  country: string;
-  address: string;
-  shopName: string;
-  shopAddress: string;
-};

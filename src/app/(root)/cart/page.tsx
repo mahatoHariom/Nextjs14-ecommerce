@@ -3,6 +3,7 @@ import React from "react";
 import { DataTable, Product } from "./CartPage";
 import { ColumnDef } from "@tanstack/react-table";
 import { MdDeleteForever } from "react-icons/md";
+import { useCartStore } from "@/stores/cartStore";
 const Product = [
   {
     id: "728ed52f",
@@ -65,20 +66,30 @@ export const columns: ColumnDef<Product>[] = [
   {
     id: "action",
     header: "Action",
-    cell: ({ row }) => <MdDeleteForever size={20} color={"Red"} onClick={()=>console.log(row?.original.id)} className="hover:cursor-pointer">Delete</MdDeleteForever>,
+    cell: ({ row }) => (
+      <MdDeleteForever
+        size={20}
+        color={"Red"}
+        onClick={() => console.log(row?.original.id)}
+        className="hover:cursor-pointer"
+      >
+        Delete
+      </MdDeleteForever>
+    ),
   },
 ];
-const page = () => {
+const CartPage = () => {
+  const { cart } = useCartStore();
   return (
     <div className="w-full flex flex-col">
       <div className="p-5">
         <h1 className="text-center font-bold text-2xl">Your Cart</h1>
       </div>
       <div className="w-[70%] m-auto">
-        <DataTable columns={columns} data={Product} />
+        <DataTable />
       </div>
     </div>
   );
 };
 
-export default page;
+export default CartPage;

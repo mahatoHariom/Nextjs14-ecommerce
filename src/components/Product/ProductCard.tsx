@@ -9,22 +9,34 @@ import { Card, CardFooter, CardHeader } from "../ui/card";
 import StarRating from "../StarRating";
 import { FaExpandAlt, FaHeart } from "react-icons/fa";
 import { IoMdGitCompare } from "react-icons/io";
+import { Product } from "@/types";
+import { addCartItem, useCartStore } from "@/stores/cartStore";
 
-const ProductCard = () => {
+interface CardProps {
+  product: Product;
+}
+const ProductCard = (props: CardProps) => {
+  const { product } = props;
+  console.log(product, "card");
   const [isHovered, setIsHovered] = useState(false);
+  const { addToCart } = useCartStore();
   const [selectedRating, setSelectedRating] = useState(3.5);
-
   const handleRating = (rating: number) => {
-    // Handle the rating (e.g., send it to the server, update state, etc.)
-    console.log("User rated:", rating);
+    console.log("User rated:", product);
   };
+
+  const addToCartHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault(); // Prevent the default behavior of the button click
+    const product = props.product; // Assuming 'props' contains the product information
+    useCartStore.getState().addToCart(product?.id, 4, product);
+  };
+
   return (
     <Card
-      className="w-full h-[360px] rounded-none relative mx-auto bg-card dark:border-none"
+      className="w-full h-[320px] rounded-none relative mx-auto bg-card dark:border-none"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      
       {isHovered && (
         <div className="absolute top-2 z-10 flex flex-col items-center gap-3 right-2">
           <div className="p-2 bg-blue-100 rounded-full hover:cursor-pointer">
@@ -39,25 +51,27 @@ const ProductCard = () => {
         </div>
       )}
 
-      <CardHeader >
+      <CardHeader>
         <div className="relative w-full h-[150px] m-auto ">
-        <Image
-          src="/imac.png"
-          alt="product"
-          fill={true}
-          className="object-cover"
-        />
+          <Image
+            src={product?.images[0]?.imgSrc}
+            alt="product"
+            fill={true}
+            className="object-cover"
+          />
         </div>
-       
       </CardHeader>
       <CardFooter className=" flex flex-col h-full gap-3">
-        <div className="w-full ">
+        {/* <div className="w-full ">
           <StarRating totalStars={5} initialRating={3} onRate={handleRating} />
-        </div>
+        </div> */}
 
         <h1 className="w-full font-bold break-words">
-          <Link href={"/product/sdfsd"} className="hover:text-blue-500">
-            Acer Nitro 5 2023 Model 8-gbram,256gb storage
+          <Link
+            href={`/product/${product?.id}`}
+            className="hover:text-blue-500 text-sm"
+          >
+            {product?.name}
           </Link>
         </h1>
 
@@ -71,13 +85,16 @@ const ProductCard = () => {
           className="w-full"
         >
           {isHovered && (
-            <Button className="w-full flex items-center bg-primary">
+            <Button
+              className="w-full flex items-center bg-primary"
+              onClick={addToCartHandler}
+            >
               <p className="font-bold">Add to Cart</p>
             </Button>
           )}
         </motion.div>
 
-        <div className="flex w-full gap-3">
+        <div className="flex w-full  gap-3">
           <motion.section
             initial={{ opacity: 1 }}
             animate={{
@@ -88,7 +105,7 @@ const ProductCard = () => {
               isHovered ? "hidden" : ""
             }`}
           >
-            Rs 400
+            <p className="flex">{product?.discountPrice}</p>
           </motion.section>
           <motion.section
             initial={{ opacity: 1 }}
@@ -100,7 +117,7 @@ const ProductCard = () => {
               isHovered ? "hidden" : ""
             }`}
           >
-            Rs 500
+            <p className="flex gap-1"> Rs{product?.discountPrice}</p>
           </motion.section>
         </div>
       </CardFooter>

@@ -1,8 +1,8 @@
-
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { z, ZodError } from "zod";
 import {
   Form,
   FormControl,
@@ -12,174 +12,97 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useCartStore } from "@/stores/cartStore";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { createOrder } from "@/actions/order";
+import { toast } from "sonner";
+
+// Define Zod schema for form data
+const checkoutSchema = z.object({
+  contact: z.string().min(10),
+  address: z.string().min(1),
+});
+
 const CheckoutForm = () => {
-  const form = useForm();
+  const { cart } = useCartStore();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(checkoutSchema),
+  });
+
+  const { mutate: createOrderHandler } = useMutation({
+    mutationKey: ["order"],
+    mutationFn: createOrder,
+  });
+
+  const onSubmit = (data: any) => {
+    const orderData = createOrderData(data.contact, data.address, cart);
+    createOrderHandler(orderData, {
+      onSuccess: (data) => {
+        toast.success("Successfully created");
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    });
+  };
+
+  const createOrderData = (contact: any, address: any, cartItes: any) => {
+    const calculateTotal = (quantity: any, discountPrice: any) =>
+      quantity * discountPrice;
+
+    const userInfo = {
+      contact,
+      address,
+    };
+
+    const orderItems = cart.map((item: any) => ({
+      productId: item.product.id,
+      quantity: item.quantity,
+      total: calculateTotal(item.quantity, item.product.discountPrice),
+    }));
+
+    return {
+      userInfo,
+      items: orderItems,
+    };
+  };
+
   return (
-    <div className="w-full lg:w-[80%] m-auto h-full">
+    <div className="w-full lg:w-[50%] m-auto h-full">
       <h1 className="p-5 text-3xl font-semibold text-center">Checkout</h1>
-      <div className="flex flex-col  w-full gap-3 lg:flex-row ">
-        {/* CHECKOUT DETAIL SECTION */}
-        <div className="lg:w-[50%] h-full  w-full m-auto   p-5 mt-0 bg-card">
-          <h1 className="p-5 text-center text-2xl font-semibold ">Billing Details</h1>
-          <Form {...form}>
-            <form>
-              <div className="flex gap-3 w-full">
-                <div className="w-full">  
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>FirstName</FormLabel>
-                      <FormControl>
-                        <Input placeholder="First Name" {...field}/>
-                      </FormControl>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      <h1 className="p-5 text-center text-2xl font-semibold ">
+        Billing Details
+      </h1>
 
-                </div>
-               
-                <div className="w-full">
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="last Name" {...field} />
-                      </FormControl>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Input placeholder="Contact" {...register("contact")} />
+        {errors.contact && (
+          <span className="text-red-500">
+            {errors.contact.message as string}
+          </span>
+        )}
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                </div>
-              </div>
-              <div className="flex gap-3">
-              <div className="w-full"> 
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email </FormLabel>
-                      <FormControl>
-                        <Input placeholder="Email" {...field} />
-                      </FormControl>
+        <Input
+          className="mt-5"
+          placeholder="Address"
+          {...register("address")}
+        />
+        {errors.address && (
+          <span className="text-red-500">
+            {errors.address.message as string}
+          </span>
+        )}
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                </div>
-                <div className="w-full"> 
-                <FormField
-                  control={form.control}
-                  name="Contact"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Contact" {...field} />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                </div>
-              </div>
-              <div className="flex gap-3 ">
-              <div className="w-full"> 
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Address" {...field} />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                </div>
-                <div className="w-full"> 
-                <FormField
-                  control={form.control}
-                  name="zipCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Zip Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Zip Code" {...field} />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                </div>
-              </div>
-            </form>
-          </Form>
-        </div>
-
-        {/* PRODUCT SUMMARY SECTION */}
-        <div className="w-full h-full lg:w-[50%] m-auto  p-5 border bg-card dark:border-none rounded-lg">
-          <h1 className="p-5 text-2xl font-semibold ">Order Summary</h1>
-          <div className="flex justify-between p-5">
-            <h1>PRODUCTS</h1>
-            <h1>TOTAL</h1>
-          </div>
-
-          <div className="flex flex-col gap-10 justify-between p-5">
-            <div className="flex justify-between">
-              <p>Apple Watchx1</p>
-              <p className="font-semibold">$56</p>
-            </div>
-           
-            <div className="flex justify-between">
-              <p>Apple Watchx1</p>
-              <p className="font-semibold">$56</p>
-            </div>
-           
-            <div className="flex justify-between">
-              <p>Apple Watchx1</p>
-              <p className="font-semibold">$56</p>
-            </div>
-           
-            <div className="flex justify-between">
-              <p>Apple Watchx1</p>
-              <p className="font-semibold">$56</p>
-            </div>
-           
-            <div className="flex justify-between">
-              <p>Apple Watchx1</p>
-              <p className="font-semibold">$56</p>
-            </div>
-          </div>
-
-          <hr />
-          <div className="flex flex-col gap-4 p-5">
-            <div className="flex justify-between">
-              <p className="font-semibold">TOTAL</p>
-              <p className="font-semibold">$56</p>
-            </div>
-            <div className="flex gap-3">
-              <input type="checkbox" />
-              <label>Cash On Delivery</label>
-            </div>
-            <Button className="w-full">Place Order Now</Button>
-          </div>
-        </div>
-      </div>
+        <Button type="submit" className="w-full mt-5">
+          Place Order Now
+        </Button>
+      </form>
     </div>
   );
 };

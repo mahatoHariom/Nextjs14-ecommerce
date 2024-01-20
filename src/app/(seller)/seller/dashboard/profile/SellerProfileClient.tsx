@@ -2,7 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm, SubmitHandler } from "react-hook-form";
 import React, { useEffect } from "react";
-import { Seller, updateSellerType } from "@/types";
+import { Seller } from "@/types";
 import { motion } from "framer-motion";
 import { getSellerProfile, updateSellerById } from "@/actions/seller";
 import {
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { SellerUpdateSchema } from "@/types/seller.type";
 
 const SellerProfileClient: React.FC = () => {
   const queryClient = useQueryClient();
@@ -26,14 +27,14 @@ const SellerProfileClient: React.FC = () => {
   });
   const { mutate } = useMutation({
     mutationKey: ["seller"],
-    mutationFn: (params: { id: string; data: updateSellerType }) =>
+    mutationFn: (params: { id: string; data: SellerUpdateSchema }) =>
       updateSellerById(params.id, params.data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["seller"] });
     },
   });
 
-  const initalValues: updateSellerType = {
+  const initalValues: SellerUpdateSchema = {
     firstName: seller?.firstName ?? "",
     lastName: seller?.lastName ?? "",
     contact: seller?.contact ?? "",
@@ -44,11 +45,11 @@ const SellerProfileClient: React.FC = () => {
     shopAddress: seller?.shopAddress ?? "",
   };
 
-  const form = useForm<updateSellerType>({
+  const form = useForm<SellerUpdateSchema>({
     defaultValues: initalValues,
   });
 
-  const onSubmit: SubmitHandler<updateSellerType> = (values) => {
+  const onSubmit: SubmitHandler<SellerUpdateSchema> = (values) => {
     mutate(
       { id: seller?.id as string, data: values },
       {
@@ -65,7 +66,7 @@ const SellerProfileClient: React.FC = () => {
 
   useEffect(() => {
     Object.entries(initalValues).forEach(([fieldName, value]) => {
-      form.setValue(fieldName as keyof updateSellerType, value as string);
+      form.setValue(fieldName as keyof SellerUpdateSchema, value as string);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seller]);
@@ -86,9 +87,8 @@ const SellerProfileClient: React.FC = () => {
               <motion.div key={fieldName} whileTap={{ scale: 0.95 }}>
                 <FormField
                   control={form.control}
-                  name={fieldName as keyof updateSellerType}
+                  name={fieldName as keyof SellerUpdateSchema}
                   defaultValue={initalValues.firstName}
-         
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel>{fieldName}</FormLabel>

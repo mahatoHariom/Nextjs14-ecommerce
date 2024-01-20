@@ -1,25 +1,25 @@
-import { getProductById } from "@/actions/product";
+import { getAllOrderOfSeller, getAllProductsOfSeller } from "@/actions/seller";
 import {
   HydrationBoundary,
   QueryClient,
   dehydrate,
 } from "@tanstack/react-query";
 import React from "react";
-import SingleClient from "./SingleClient";
+import OrdersComponent from "./OrdersComponent";
 
-const page = async ({ params }: { params: { id: string } }) => {
+const pages = async () => {
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
-    queryKey: ["getProductById", params.id],
-    queryFn: () => getProductById(params?.id),
+    queryKey: ["orders"],
+    queryFn: getAllOrderOfSeller,
   });
   return (
     <div>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <SingleClient />
+        <OrdersComponent />
       </HydrationBoundary>
     </div>
   );
 };
 
-export default page;
+export default pages;

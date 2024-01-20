@@ -8,7 +8,7 @@ import { toast } from "sonner";
 const DeleteSellerProduct = ({ id }: { id: string }) => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
-    mutationKey: ["products"],
+    mutationKey: ["deleteproduct"],
     mutationFn: (id: string) => deletProdctById(id),
     onSuccess: (data) => {
       toast.success(data?.data?.message);
